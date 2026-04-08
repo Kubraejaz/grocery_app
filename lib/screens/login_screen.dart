@@ -5,12 +5,12 @@ import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/helpers.dart';
+import '../utils/validators.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -21,6 +21,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passCtrl  = TextEditingController();
   bool  _obscure   = true;
 
+  // Field-level server error
+  String? _emailError;
+  String? _passError;
+
   @override
   void dispose() {
     _emailCtrl.dispose();
@@ -29,6 +33,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
+    setState(() { _emailError = null; _passError = null; });
+
     if (!_formKey.currentState!.validate()) return;
 
     final auth    = context.read<AuthProvider>();
@@ -40,7 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      // Load products then navigate to Home
       await context.read<ProductProvider>().init();
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -48,9 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } else {
-      // Show the specific error from auth provider
       if (auth.needsConfirmation) {
-        // Show a special dialog for unconfirmed email
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
@@ -60,36 +63,26 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width:  64,
-                  height: 64,
+                  width: 64, height: 64,
                   decoration: BoxDecoration(
-                    color:  AppTheme.warning.withOpacity(0.1),
-                    shape:  BoxShape.circle,
+                    color: AppTheme.warning.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.mark_email_unread_outlined,
-                    color: AppTheme.warning,
-                    size:  34,
-                  ),
+                  child: const Icon(Icons.mark_email_unread_outlined,
+                      color: AppTheme.warning, size: 34),
                 ),
                 const SizedBox(height: 14),
-                const Text(
-                  'Email Not Confirmed',
-                  style: TextStyle(
-                    fontSize:   18,
-                    fontWeight: FontWeight.bold,
-                    color:      AppTheme.textDark,
-                  ),
-                ),
+                const Text('Email Not Confirmed',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textDark)),
                 const SizedBox(height: 8),
                 const Text(
                   'Please check your inbox and click the '
-                  'confirmation link we sent you, then try logging in again.',
+                  'confirmation link, then try again.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color:  AppTheme.textMuted,
-                    height: 1.5,
-                  ),
+                  style: TextStyle(color: AppTheme.textMuted, height: 1.5),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
@@ -101,11 +94,23 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       } else {
-        Helpers.showSnack(
-          context,
-          auth.error ?? 'Login failed. Please try again.',
-          error: true,
-        );
+        // Map server error to correct field
+        final err = auth.error ?? '';
+        if (err.toLowerCase().contains('invalid login credentials') ||
+            err.toLowerCase().contains('invalid credentials')) {
+          setState(() {
+            _emailError = ' '; // space triggers red border without text
+            _passError  = 'Incorrect email or password. Please try again.';
+          });
+        } else if (err.toLowerCase().contains('email')) {
+          setState(() => _emailError = err);
+        } else if (err.toLowerCase().contains('password')) {
+          setState(() => _passError = err);
+        } else {
+          Helpers.showSnack(context,
+              err.isNotEmpty ? err : 'Login failed. Please try again.',
+              error: true);
+        }
       }
     }
   }
@@ -120,9 +125,9 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ── Green header banner ───────────────────────
+            // ── Header ────────────────────────────────────
             Container(
-              width:  double.infinity,
+              width: double.infinity,
               height: size.height * 0.30,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -139,85 +144,74 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width:  80,
-                    height: 80,
+                    width: 80, height: 80,
                     decoration: BoxDecoration(
                       color:        Colors.white,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Icon(
-                      Icons.shopping_basket_rounded,
-                      size:  44,
-                      color: AppTheme.primary,
-                    ),
+                    child: const Icon(Icons.shopping_basket_rounded,
+                        size: 44, color: AppTheme.primary),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Grocery App',
-                    style: TextStyle(
-                      color:      Colors.white,
-                      fontSize:   22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  const Text('Grocery App',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
 
-            // ── Form ──────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 8),
-                  const Text(
-                    'Welcome Back!',
-                    style: TextStyle(
-                      fontSize:   26,
-                      fontWeight: FontWeight.bold,
-                      color:      AppTheme.textDark,
-                    ),
-                  ),
+                  const Text('Welcome Back!',
+                      style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textDark)),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Sign in to continue shopping',
-                    style: TextStyle(color: AppTheme.textMuted),
-                  ),
+                  const Text('Sign in to continue shopping',
+                      style: TextStyle(color: AppTheme.textMuted)),
                   const SizedBox(height: 28),
 
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        // Email
+
+                        // ── Email ───────────────────────────
                         TextFormField(
                           controller:   _emailCtrl,
                           keyboardType: TextInputType.emailAddress,
-                          decoration:   const InputDecoration(
+                          onChanged: (_) =>
+                              setState(() => _emailError = null),
+                          decoration: InputDecoration(
                             labelText:  'Email Address',
                             hintText:   'you@example.com',
-                            prefixIcon: Icon(Icons.email_outlined),
+                            prefixIcon: const Icon(Icons.email_outlined),
+                            errorText: _emailError?.trim().isEmpty == true
+                                ? null
+                                : _emailError,
                           ),
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty)
-                              return 'Please enter your email';
-                            if (!RegExp(r'^[\w-.]+@[\w-]+\.\w+$')
-                                .hasMatch(v.trim()))
-                              return 'Enter a valid email address';
-                            return null;
-                          },
+                          validator: Validators.email,
                         ),
                         const SizedBox(height: 16),
 
-                        // Password
+                        // ── Password ────────────────────────
                         TextFormField(
                           controller:  _passCtrl,
                           obscureText: _obscure,
-                          decoration:  InputDecoration(
+                          onChanged:   (_) =>
+                              setState(() => _passError = null),
+                          decoration: InputDecoration(
                             labelText:  'Password',
-                            hintText:   'Min. 6 characters',
+                            hintText:   'Your password',
                             prefixIcon: const Icon(Icons.lock_outline),
+                            errorText:  _passError,
                             suffixIcon: IconButton(
                               icon: Icon(_obscure
                                   ? Icons.visibility_off_outlined
@@ -228,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           validator: (v) {
                             if (v == null || v.isEmpty)
-                              return 'Please enter your password';
+                              return 'Password is required';
                             if (v.length < 6)
                               return 'Password must be at least 6 characters';
                             return null;
@@ -236,44 +230,35 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 28),
 
-                        // Login button
                         ElevatedButton(
                           onPressed: auth.loading ? null : _login,
                           child: auth.loading
                               ? const SizedBox(
-                                  height: 22,
-                                  width:  22,
-                                  child:  CircularProgressIndicator(
-                                    color:       Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
+                                  height: 22, width: 22,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2))
                               : const Text('Login'),
                         ),
                         const SizedBox(height: 20),
 
-                        // Register link
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(
-                              "Don't have an account?  ",
-                              style: TextStyle(color: AppTheme.textMuted),
-                            ),
+                            const Text("Don't have an account?  ",
+                                style: TextStyle(
+                                    color: AppTheme.textMuted)),
                             GestureDetector(
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const RegisterScreen(),
-                                ),
+                                    builder: (_) =>
+                                        const RegisterScreen()),
                               ),
-                              child: const Text(
-                                'Register',
-                                style: TextStyle(
-                                  color:      AppTheme.primary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                              child: const Text('Register',
+                                  style: TextStyle(
+                                      color: AppTheme.primary,
+                                      fontWeight: FontWeight.w700)),
                             ),
                           ],
                         ),

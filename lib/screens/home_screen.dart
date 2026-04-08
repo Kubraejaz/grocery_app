@@ -4,12 +4,14 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/wishlist_provider.dart';
 import '../utils/app_theme.dart';
 import '../widgets/category_chip.dart';
 import '../widgets/featured_banner.dart';
 import '../widgets/product_card.dart';
 import 'cart_screen.dart';
 import 'profile_screen.dart';
+import 'wishlist_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,14 +21,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _searchCtrl  = TextEditingController();
-  bool  _showSearch  = false;
+  final _searchCtrl = TextEditingController();
+  bool  _showSearch = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CartProvider>().load();
+      context.read<WishlistProvider>().load();
     });
   }
 
@@ -50,12 +53,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final auth     = context.watch<AuthProvider>();
     final products = context.watch<ProductProvider>();
     final cart     = context.watch<CartProvider>();
+    final wishlist = context.watch<WishlistProvider>();
 
     final selCatName = products.selCatId == null
         ? 'All Products'
         : (products.categories
-            .where((c) => c.id == products.selCatId)
-            .isNotEmpty
+                .where((c) => c.id == products.selCatId)
+                .isNotEmpty
             ? products.categories
                 .firstWhere((c) => c.id == products.selCatId)
                 .name
@@ -74,13 +78,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 style:       const TextStyle(color: Colors.white),
                 cursorColor: Colors.white,
                 decoration:  const InputDecoration(
-                  hintText:        'Search groceries...',
-                  hintStyle:       TextStyle(color: Colors.white60),
-                  border:          InputBorder.none,
-                  enabledBorder:   InputBorder.none,
-                  focusedBorder:   InputBorder.none,
-                  fillColor:       Colors.transparent,
-                  contentPadding:  EdgeInsets.zero,
+                  hintText:       'Search groceries...',
+                  hintStyle:      TextStyle(color: Colors.white60),
+                  border:         InputBorder.none,
+                  enabledBorder:  InputBorder.none,
+                  focusedBorder:  InputBorder.none,
+                  fillColor:      Colors.transparent,
+                  contentPadding: EdgeInsets.zero,
                 ),
               )
             : const Text('Grocery App'),
@@ -97,6 +101,43 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
 
+          // Wishlist icon with badge
+          Stack(
+            alignment: Alignment.topRight,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.favorite_border_rounded),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const WishlistScreen()),
+                ),
+              ),
+              if (wishlist.count > 0)
+                Positioned(
+                  right: 6, top: 6,
+                  child: Container(
+                    width:  16,
+                    height: 16,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${wishlist.count > 9 ? '9+' : wishlist.count}',
+                        style: const TextStyle(
+                          fontSize:   9,
+                          color:      Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+
           // Cart with badge
           Stack(
             alignment: Alignment.topRight,
@@ -110,16 +151,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               if (cart.totalCount > 0)
                 Positioned(
-                  right: 6,
-                  top:   6,
+                  right: 6, top: 6,
                   child: Container(
-                    width:  18,
-                    height: 18,
+                    width:  16,
+                    height: 16,
                     decoration: BoxDecoration(
-                      color:        AppTheme.accent,
-                      shape:        BoxShape.circle,
+                      color:  AppTheme.accent,
+                      shape:  BoxShape.circle,
                       border: Border.all(
-                          color: AppTheme.primary, width: 1.5),
+                          color: AppTheme.primary, width: 1.2),
                     ),
                     child: Center(
                       child: Text(
@@ -173,9 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const Text(
                       'What would you like to buy today?',
                       style: TextStyle(
-                        fontSize: 14,
-                        color:    AppTheme.textMuted,
-                      ),
+                          fontSize: 14, color: AppTheme.textMuted),
                     ),
                   ],
                 ),
@@ -200,18 +238,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 46,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16),
                     children: [
                       CategoryChip(
                         label:      'All',
                         isSelected: products.selCatId == null,
-                        onTap:      () => products.selectCategory(null),
+                        onTap: () => products.selectCategory(null),
                       ),
                       ...products.categories.map(
                         (c) => CategoryChip(
                           label:      c.name,
                           isSelected: products.selCatId == c.id,
-                          onTap:      () => products.selectCategory(c.id),
+                          onTap: () => products.selectCategory(c.id),
                         ),
                       ),
                     ],
@@ -224,7 +263,8 @@ class _HomeScreenState extends State<HomeScreen> {
             // Section header
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -239,9 +279,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '${products.products.length} items',
                       style: const TextStyle(
-                        fontSize: 13,
-                        color:    AppTheme.textMuted,
-                      ),
+                          fontSize: 13, color: AppTheme.textMuted),
                     ),
                   ],
                 ),
@@ -250,15 +288,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-            // Product grid / loading / empty
+            // Products grid
             if (products.loading)
               const SliverToBoxAdapter(
                 child: Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 60),
                     child:   CircularProgressIndicator(
-                      color: AppTheme.primary,
-                    ),
+                        color: AppTheme.primary),
                   ),
                 ),
               )
@@ -267,28 +304,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 60),
-                    child:   Column(
+                    child: Column(
                       children: [
-                        Icon(
-                          Icons.search_off_rounded,
-                          size:  72,
-                          color: Colors.grey.shade300,
-                        ),
+                        Icon(Icons.search_off_rounded,
+                            size:  72,
+                            color: Colors.grey.shade300),
                         const SizedBox(height: 14),
                         const Text(
                           'No products found',
                           style: TextStyle(
-                            fontSize: 16,
-                            color:    AppTheme.textMuted,
-                          ),
+                              fontSize: 16, color: AppTheme.textMuted),
                         ),
                         const SizedBox(height: 6),
                         const Text(
                           'Try a different category or search term',
                           style: TextStyle(
-                            fontSize: 13,
-                            color:    AppTheme.textLight,
-                          ),
+                              fontSize: 13,
+                              color: AppTheme.textLight),
                         ),
                       ],
                     ),
@@ -297,16 +329,18 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverGrid(
                   delegate: SliverChildBuilderDelegate(
-                    (_, i) => ProductCard(product: products.products[i]),
+                    (_, i) => ProductCard(
+                        product: products.products[i]),
                     childCount: products.products.length,
                   ),
                   gridDelegate:
                       const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount:   2,
-                    childAspectRatio: 0.68,
+                    childAspectRatio: 0.65,
                     crossAxisSpacing: 12,
                     mainAxisSpacing:  12,
                   ),

@@ -7,13 +7,13 @@ import 'config/supabase_config.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/product_provider.dart';
+import 'providers/wishlist_provider.dart';
 import 'screens/splash_screen.dart';
 import 'utils/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialise Supabase with hardcoded keys
   await Supabase.initialize(
     url:     SupabaseConfig.url,
     anonKey: SupabaseConfig.anonKey,
@@ -32,6 +32,7 @@ class GroceryApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
       ],
       child: MaterialApp(
         title: 'Grocery App',

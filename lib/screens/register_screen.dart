@@ -5,12 +5,12 @@ import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/helpers.dart';
+import '../utils/validators.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
-
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
@@ -24,6 +24,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool  _obscurePass    = true;
   bool  _obscureConfirm = true;
 
+  // Real-time field error states
+  String? _nameError;
+  String? _emailError;
+  String? _passError;
+  String? _confirmError;
+
   @override
   void dispose() {
     _nameCtrl.dispose();
@@ -34,6 +40,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
+    // Clear previous server errors
+    setState(() {
+      _nameError    = null;
+      _emailError   = null;
+      _passError    = null;
+      _confirmError = null;
+    });
+
     if (!_formKey.currentState!.validate()) return;
 
     final auth   = context.read<AuthProvider>();
@@ -46,7 +60,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
 
     if (result == 'success') {
-      // Email confirmation is OFF → user is fully logged in → go to Home
       await context.read<ProductProvider>().init();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
@@ -54,9 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         MaterialPageRoute(builder: (_) => const HomeScreen()),
         (_) => false,
       );
-
     } else if (result == 'confirm') {
-      // Email confirmation is ON → show dialog, then go to Login
       await showDialog(
         context: context,
         barrierDismissible: false,
@@ -67,37 +78,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width:  72,
-                height: 72,
+                width: 72, height: 72,
                 decoration: BoxDecoration(
-                  color:  AppTheme.primary.withOpacity(0.1),
-                  shape:  BoxShape.circle,
+                  color: AppTheme.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.mark_email_unread_outlined,
-                  color: AppTheme.primary,
-                  size:  38,
-                ),
+                child: const Icon(Icons.mark_email_unread_outlined,
+                    color: AppTheme.primary, size: 38),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Check Your Email',
-                style: TextStyle(
-                  fontSize:   20,
-                  fontWeight: FontWeight.bold,
-                  color:      AppTheme.textDark,
-                ),
-              ),
+              const Text('Check Your Email',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textDark)),
               const SizedBox(height: 10),
               Text(
-                'We sent a confirmation link to:\n${_emailCtrl.text.trim()}\n\n'
-                'Please click the link in the email to activate your account, '
-                'then come back and login.',
+                'We sent a confirmation link to:\n'
+                '${_emailCtrl.text.trim()}\n\n'
+                'Click the link to activate your account, then login.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color:  AppTheme.textMuted,
-                  height: 1.5,
-                ),
+                    color: AppTheme.textMuted, height: 1.5),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -108,57 +110,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       );
-
-      // After dialog closes → go to Login screen
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
         (_) => false,
       );
-
     } else {
-      // Error → show snack with error message
-      Helpers.showSnack(
-        context,
-        auth.error ?? 'Registration failed. Please try again.',
-        error: true,
-      );
+      // Map server error to the correct field
+      final err = auth.error ?? '';
+      if (err.toLowerCase().contains('already registered') ||
+          err.toLowerCase().contains('already been registered') ||
+          err.toLowerCase().contains('duplicate') ||
+          err.toLowerCase().contains('email')) {
+        setState(() => _emailError =
+            'This email is already registered. Please login instead.');
+      } else if (err.toLowerCase().contains('password')) {
+        setState(() => _passError = err);
+      } else {
+        Helpers.showSnack(context,
+            err.isNotEmpty ? err : 'Registration failed. Please try again.',
+            error: true);
+      }
     }
-  }
-
-  Widget _buildField({
-    required TextEditingController    controller,
-    required String                   label,
-    required String                   hint,
-    required IconData                 icon,
-    bool                              obscure       = false,
-    VoidCallback?                     toggleObscure,
-    TextInputType                     keyboardType  = TextInputType.text,
-    String? Function(String?)?        validator,
-  }) {
-    return TextFormField(
-      controller:         controller,
-      obscureText:        obscure,
-      keyboardType:       keyboardType,
-      textCapitalization: keyboardType == TextInputType.name
-          ? TextCapitalization.words
-          : TextCapitalization.none,
-      decoration: InputDecoration(
-        labelText:  label,
-        hintText:   hint,
-        prefixIcon: Icon(icon),
-        suffixIcon: toggleObscure != null
-            ? IconButton(
-                icon: Icon(obscure
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined),
-                onPressed: toggleObscure,
-              )
-            : null,
-      ),
-      validator: validator,
-    );
   }
 
   @override
@@ -170,24 +144,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: AppTheme.textDark,
-        elevation:       0,
-        title: const Text(
-          'Create Account',
-          style: TextStyle(color: AppTheme.textDark),
-        ),
+        elevation: 0,
+        title: const Text('Create Account',
+            style: TextStyle(color: AppTheme.textDark)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Header banner ─────────────────────────────
+            // Header
             Container(
-              padding:    const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [AppTheme.primary, AppTheme.primaryLight],
-                ),
+                    colors: [AppTheme.primary, AppTheme.primaryLight]),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Row(
@@ -198,19 +169,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Join Grocery App',
-                        style: TextStyle(
-                          color:      Colors.white,
-                          fontSize:   18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Fresh groceries delivered to you',
-                        style: TextStyle(
-                            color: Colors.white70, fontSize: 13),
-                      ),
+                      Text('Join Grocery App',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
+                      Text('Fresh groceries delivered to you',
+                          style: TextStyle(
+                              color: Colors.white70, fontSize: 13)),
                     ],
                   ),
                 ],
@@ -222,104 +188,135 @@ class _RegisterScreenState extends State<RegisterScreen> {
               key: _formKey,
               child: Column(
                 children: [
-                  // Full Name
-                  _buildField(
-                    controller:   _nameCtrl,
-                    label:        'Full Name',
-                    hint:         'Ali Hassan',
-                    icon:         Icons.person_outline,
-                    keyboardType: TextInputType.name,
-                    validator: (v) => (v == null || v.trim().isEmpty)
-                        ? 'Please enter your full name'
-                        : null,
+
+                  // ── Full Name ───────────────────────────
+                  TextFormField(
+                    controller:         _nameCtrl,
+                    keyboardType:       TextInputType.name,
+                    textCapitalization: TextCapitalization.words,
+                    onChanged: (_) =>
+                        setState(() => _nameError = null),
+                    decoration: InputDecoration(
+                      labelText:  'Full Name',
+                      hintText:   'e.g. Ali Hassan',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      errorText:  _nameError,
+                    ),
+                    validator: Validators.fullName,
                   ),
                   const SizedBox(height: 16),
 
-                  // Email
-                  _buildField(
+                  // ── Email ───────────────────────────────
+                  TextFormField(
                     controller:   _emailCtrl,
-                    label:        'Email Address',
-                    hint:         'you@example.com',
-                    icon:         Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty)
-                        return 'Please enter your email';
-                      if (!RegExp(r'^[\w-.]+@[\w-]+\.\w+$')
-                          .hasMatch(v.trim()))
-                        return 'Enter a valid email address';
-                      return null;
-                    },
+                    onChanged:    (_) =>
+                        setState(() => _emailError = null),
+                    decoration: InputDecoration(
+                      labelText:  'Email Address',
+                      hintText:   'you@example.com',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      errorText:  _emailError,
+                      // Show red border if server returned email error
+                      focusedBorder: _emailError != null
+                          ? OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                  color: AppTheme.error, width: 2),
+                            )
+                          : null,
+                    ),
+                    validator: Validators.email,
                   ),
                   const SizedBox(height: 16),
 
-                  // Password
-                  _buildField(
-                    controller:    _passCtrl,
-                    label:         'Password',
-                    hint:          'Min. 6 characters',
-                    icon:          Icons.lock_outline,
-                    obscure:       _obscurePass,
-                    toggleObscure: () =>
-                        setState(() => _obscurePass = !_obscurePass),
-                    validator: (v) {
-                      if (v == null || v.isEmpty)
-                        return 'Please enter a password';
-                      if (v.length < 6)
-                        return 'Password must be at least 6 characters';
-                      return null;
+                  // ── Password ────────────────────────────
+                  TextFormField(
+                    controller:  _passCtrl,
+                    obscureText: _obscurePass,
+                    onChanged:   (_) {
+                      setState(() => _passError = null);
+                      // Re-validate confirm when password changes
+                      if (_confirmCtrl.text.isNotEmpty) {
+                        _formKey.currentState?.validate();
+                      }
                     },
+                    decoration: InputDecoration(
+                      labelText:  'Password',
+                      hintText:   'Min. 6 chars, include a letter & number',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      errorText:  _passError,
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscurePass
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined),
+                        onPressed: () =>
+                            setState(() => _obscurePass = !_obscurePass),
+                      ),
+                    ),
+                    validator: Validators.password,
                   ),
                   const SizedBox(height: 16),
 
-                  // Confirm Password
-                  _buildField(
-                    controller:    _confirmCtrl,
-                    label:         'Confirm Password',
-                    hint:          'Re-enter password',
-                    icon:          Icons.lock_outline,
-                    obscure:       _obscureConfirm,
-                    toggleObscure: () =>
-                        setState(() => _obscureConfirm = !_obscureConfirm),
-                    validator: (v) => v != _passCtrl.text
-                        ? 'Passwords do not match'
-                        : null,
+                  // ── Confirm Password ────────────────────
+                  TextFormField(
+                    controller:  _confirmCtrl,
+                    obscureText: _obscureConfirm,
+                    onChanged:   (_) =>
+                        setState(() => _confirmError = null),
+                    decoration: InputDecoration(
+                      labelText:  'Confirm Password',
+                      hintText:   'Re-enter your password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      errorText:  _confirmError,
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscureConfirm
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined),
+                        onPressed: () => setState(
+                            () => _obscureConfirm = !_obscureConfirm),
+                      ),
+                    ),
+                    validator: (v) =>
+                        Validators.confirmPassword(v, _passCtrl.text),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 8),
+
+                  // Password hint
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '• At least 6 characters\n'
+                      '• Must include a letter and a number',
+                      style: TextStyle(
+                          fontSize: 12, color: AppTheme.textMuted),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
                   // Register button
                   ElevatedButton(
                     onPressed: auth.loading ? null : _register,
                     child: auth.loading
                         ? const SizedBox(
-                            height: 22,
-                            width:  22,
-                            child:  CircularProgressIndicator(
-                              color:       Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
+                            height: 22, width: 22,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2))
                         : const Text('Create Account'),
                   ),
                   const SizedBox(height: 20),
 
-                  // Back to login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Already have an account?  ',
-                        style: TextStyle(color: AppTheme.textMuted),
-                      ),
+                      const Text('Already have an account?  ',
+                          style: TextStyle(color: AppTheme.textMuted)),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            color:      AppTheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                        child: const Text('Login',
+                            style: TextStyle(
+                                color: AppTheme.primary,
+                                fontWeight: FontWeight.w700)),
                       ),
                     ],
                   ),
