@@ -30,13 +30,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
+
     final auth    = context.read<AuthProvider>();
     final success = await auth.signIn(
       _emailCtrl.text.trim(),
       _passCtrl.text,
     );
+
     if (!mounted) return;
+
     if (success) {
+      // Load products then navigate to Home
       await context.read<ProductProvider>().init();
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -44,7 +48,65 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } else {
-      Helpers.showSnack(context, auth.error ?? 'Login failed', error: true);
+      // Show the specific error from auth provider
+      if (auth.needsConfirmation) {
+        // Show a special dialog for unconfirmed email
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width:  64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color:  AppTheme.warning.withOpacity(0.1),
+                    shape:  BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.mark_email_unread_outlined,
+                    color: AppTheme.warning,
+                    size:  34,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const Text(
+                  'Email Not Confirmed',
+                  style: TextStyle(
+                    fontSize:   18,
+                    fontWeight: FontWeight.bold,
+                    color:      AppTheme.textDark,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Please check your inbox and click the '
+                  'confirmation link we sent you, then try logging in again.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color:  AppTheme.textMuted,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK, Got it'),
+                ),
+              ],
+            ),
+          ),
+        );
+      } else {
+        Helpers.showSnack(
+          context,
+          auth.error ?? 'Login failed. Please try again.',
+          error: true,
+        );
+      }
     }
   }
 
@@ -102,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
 
-            // ── Form card ─────────────────────────────────
+            // ── Form ──────────────────────────────────────
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -130,9 +192,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         // Email
                         TextFormField(
-                          controller:  _emailCtrl,
+                          controller:   _emailCtrl,
                           keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(
+                          decoration:   const InputDecoration(
                             labelText:  'Email Address',
                             hintText:   'you@example.com',
                             prefixIcon: Icon(Icons.email_outlined),
@@ -150,9 +212,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         // Password
                         TextFormField(
-                          controller:   _passCtrl,
-                          obscureText:  _obscure,
-                          decoration: InputDecoration(
+                          controller:  _passCtrl,
+                          obscureText: _obscure,
+                          decoration:  InputDecoration(
                             labelText:  'Password',
                             hintText:   'Min. 6 characters',
                             prefixIcon: const Icon(Icons.lock_outline),

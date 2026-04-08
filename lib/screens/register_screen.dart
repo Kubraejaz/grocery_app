@@ -6,6 +6,7 @@ import '../providers/product_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/helpers.dart';
 import 'home_screen.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -34,15 +35,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
-    final auth    = context.read<AuthProvider>();
-    final success = await auth.signUp(
+
+    final auth   = context.read<AuthProvider>();
+    final result = await auth.signUp(
       _emailCtrl.text.trim(),
       _passCtrl.text,
       _nameCtrl.text.trim(),
     );
+
     if (!mounted) return;
-    if (success) {
-      Helpers.showSnack(context, 'Account created successfully! 🎉');
+
+    if (result == 'success') {
+      // Email confirmation is OFF → user is fully logged in → go to Home
       await context.read<ProductProvider>().init();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
@@ -50,29 +54,93 @@ class _RegisterScreenState extends State<RegisterScreen> {
         MaterialPageRoute(builder: (_) => const HomeScreen()),
         (_) => false,
       );
+
+    } else if (result == 'confirm') {
+      // Email confirmation is ON → show dialog, then go to Login
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width:  72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color:  AppTheme.primary.withOpacity(0.1),
+                  shape:  BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.mark_email_unread_outlined,
+                  color: AppTheme.primary,
+                  size:  38,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Check Your Email',
+                style: TextStyle(
+                  fontSize:   20,
+                  fontWeight: FontWeight.bold,
+                  color:      AppTheme.textDark,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'We sent a confirmation link to:\n${_emailCtrl.text.trim()}\n\n'
+                'Please click the link in the email to activate your account, '
+                'then come back and login.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color:  AppTheme.textMuted,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Go to Login'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // After dialog closes → go to Login screen
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (_) => false,
+      );
+
     } else {
+      // Error → show snack with error message
       Helpers.showSnack(
         context,
-        auth.error ?? 'Registration failed',
+        auth.error ?? 'Registration failed. Please try again.',
         error: true,
       );
     }
   }
 
   Widget _buildField({
-    required TextEditingController controller,
-    required String                label,
-    required String                hint,
-    required IconData              icon,
-    bool                           obscure       = false,
-    VoidCallback?                  toggleObscure,
-    TextInputType                  keyboardType  = TextInputType.text,
-    String? Function(String?)?     validator,
+    required TextEditingController    controller,
+    required String                   label,
+    required String                   hint,
+    required IconData                 icon,
+    bool                              obscure       = false,
+    VoidCallback?                     toggleObscure,
+    TextInputType                     keyboardType  = TextInputType.text,
+    String? Function(String?)?        validator,
   }) {
     return TextFormField(
-      controller:   controller,
-      obscureText:  obscure,
-      keyboardType: keyboardType,
+      controller:         controller,
+      obscureText:        obscure,
+      keyboardType:       keyboardType,
       textCapitalization: keyboardType == TextInputType.name
           ? TextCapitalization.words
           : TextCapitalization.none,
@@ -103,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: Colors.transparent,
         foregroundColor: AppTheme.textDark,
         elevation:       0,
-        title:           const Text(
+        title: const Text(
           'Create Account',
           style: TextStyle(color: AppTheme.textDark),
         ),
@@ -113,10 +181,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header
+            // ── Header banner ─────────────────────────────
             Container(
-              padding:      const EdgeInsets.all(20),
-              decoration:   BoxDecoration(
+              padding:    const EdgeInsets.all(20),
+              decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [AppTheme.primary, AppTheme.primaryLight],
                 ),
@@ -141,9 +209,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Text(
                         'Fresh groceries delivered to you',
                         style: TextStyle(
-                          color:   Colors.white70,
-                          fontSize: 13,
-                        ),
+                            color: Colors.white70, fontSize: 13),
                       ),
                     ],
                   ),
@@ -163,7 +229,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hint:         'Ali Hassan',
                     icon:         Icons.person_outline,
                     keyboardType: TextInputType.name,
-                    validator:    (v) => (v == null || v.trim().isEmpty)
+                    validator: (v) => (v == null || v.trim().isEmpty)
                         ? 'Please enter your full name'
                         : null,
                   ),
@@ -176,7 +242,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hint:         'you@example.com',
                     icon:         Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    validator:    (v) {
+                    validator: (v) {
                       if (v == null || v.trim().isEmpty)
                         return 'Please enter your email';
                       if (!RegExp(r'^[\w-.]+@[\w-]+\.\w+$')
@@ -224,7 +290,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   // Register button
                   ElevatedButton(
                     onPressed: auth.loading ? null : _register,
-                    child:     auth.loading
+                    child: auth.loading
                         ? const SizedBox(
                             height: 22,
                             width:  22,
