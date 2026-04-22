@@ -137,6 +137,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                             '${product.name} removed from wishlist');
                       },
                       child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -236,6 +237,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                   children: [
                                     // Remove from wishlist
                                     GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
                                       onTap: () {
                                         wishlist.remove(product.id);
                                         Helpers.showSnack(context,
@@ -260,6 +262,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
                                     // Add to cart
                                     GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
                                       onTap: product.isInStock
                                           ? () async {
                                               await cart.add(product.id);

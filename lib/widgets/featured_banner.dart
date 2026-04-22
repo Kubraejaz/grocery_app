@@ -60,6 +60,7 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
           // Listener wraps PageView — detects drag start/end
           // so we pause auto-slide while user is swiping
           child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
             // onHorizontalDrag* is intentionally NOT set here
             // so horizontal drags fall through to PageView.
             // We only pause auto-timer on any touch start.
@@ -79,6 +80,7 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
                   // without blocking swipe gestures
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     // onTap fires on a tap; horizontal swipe will NOT
                     // trigger onTap because PageView consumes the drag.
                     onTap: () => Navigator.push(
@@ -257,6 +259,7 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
           children: List.generate(
             widget.products.length,
             (i) => GestureDetector(
+              behavior: HitTestBehavior.translucent,
               // Tap a dot to jump to that slide
               onTap: () => _pageCtrl.animateToPage(
                 i,

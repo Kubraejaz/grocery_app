@@ -1,5 +1,6 @@
 // lib/screens/register_screen.dart
 import 'package:flutter/material.dart';
+import 'package:grocery_app/screens/main_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
@@ -64,7 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const MainScreen()),
         (_) => false,
       );
     } else if (result == 'confirm') {
@@ -312,6 +313,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const Text('Already have an account?  ',
                           style: TextStyle(color: AppTheme.textMuted)),
                       GestureDetector(
+                        behavior: HitTestBehavior.translucent,
                         onTap: () => Navigator.pop(context),
                         child: const Text('Login',
                             style: TextStyle(

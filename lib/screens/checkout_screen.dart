@@ -1,6 +1,7 @@
 // lib/screens/checkout_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:grocery_app/screens/main_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../services/order_service.dart';
@@ -100,7 +101,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ElevatedButton(
               onPressed: () => Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                MaterialPageRoute(builder: (_) => const MainScreen()),
                 (_) => false,
               ),
               child: const Text('Back to Home'),
@@ -340,6 +341,7 @@ class _PaymentOption extends StatelessWidget {
   Widget build(BuildContext context) {
     final sel = selected == index;
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

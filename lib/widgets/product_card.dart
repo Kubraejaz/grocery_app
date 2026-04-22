@@ -21,6 +21,7 @@ class ProductCard extends StatelessWidget {
     final inWishlist  = wishlist.isInWishlist(product.id);
 
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
@@ -84,6 +85,7 @@ class ProductCard extends StatelessWidget {
                 Positioned(
                   top: 6, right: 6,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
                     onTap: () async {
                       await wishlist.toggle(product);
                       if (!context.mounted) return;

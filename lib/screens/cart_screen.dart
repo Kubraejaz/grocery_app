@@ -341,9 +341,10 @@ class _QtyBtn extends StatelessWidget {
     required this.onTap,
   });
 
-  @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
+    @override
+    Widget build(BuildContext context) => GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: onTap,
         child: Container(
           width:  30,
           height: 30,

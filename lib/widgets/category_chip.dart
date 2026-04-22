@@ -17,6 +17,7 @@ class CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),

@@ -9,9 +9,6 @@ import '../utils/app_theme.dart';
 import '../widgets/category_chip.dart';
 import '../widgets/featured_banner.dart';
 import '../widgets/product_card.dart';
-import 'cart_screen.dart';
-import 'profile_screen.dart';
-import 'wishlist_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -52,8 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final auth     = context.watch<AuthProvider>();
     final products = context.watch<ProductProvider>();
-    final cart     = context.watch<CartProvider>();
-    final wishlist = context.watch<WishlistProvider>();
 
     final selCatName = products.selCatId == null
         ? 'All Products'
@@ -99,90 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 context.read<ProductProvider>().clearSearch();
               }
             },
-          ),
-
-          // Wishlist icon with badge
-          Stack(
-            alignment: Alignment.topRight,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.favorite_border_rounded),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const WishlistScreen()),
-                ),
-              ),
-              if (wishlist.count > 0)
-                Positioned(
-                  right: 6, top: 6,
-                  child: Container(
-                    width:  16,
-                    height: 16,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${wishlist.count > 9 ? '9+' : wishlist.count}',
-                        style: const TextStyle(
-                          fontSize:   9,
-                          color:      Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          // Cart with badge
-          Stack(
-            alignment: Alignment.topRight,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart_outlined),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CartScreen()),
-                ),
-              ),
-              if (cart.totalCount > 0)
-                Positioned(
-                  right: 6, top: 6,
-                  child: Container(
-                    width:  16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color:  AppTheme.accent,
-                      shape:  BoxShape.circle,
-                      border: Border.all(
-                          color: AppTheme.primary, width: 1.2),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${cart.totalCount > 9 ? '9+' : cart.totalCount}',
-                        style: const TextStyle(
-                          fontSize:   9,
-                          color:      Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          // Profile
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ProfileScreen()),
-            ),
           ),
         ],
       ),

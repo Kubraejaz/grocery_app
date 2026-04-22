@@ -1,10 +1,13 @@
 // lib/screens/profile_screen.dart
 import 'package:flutter/material.dart';
+import 'package:grocery_app/utils/helpers.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/app_theme.dart';
 import 'login_screen.dart';
 import 'orders_screen.dart';
+import 'wishlist_screen.dart';
+import 'addresses_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -124,19 +127,25 @@ class ProfileScreen extends StatelessWidget {
             icon:     Icons.location_on_outlined,
             label:    'Saved Addresses',
             subtitle: 'Manage delivery addresses',
-            onTap:    () {},
+            onTap:    () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddressesScreen()),
+            ),
           ),
           _MenuTile(
             icon:     Icons.favorite_outline,
             label:    'Wishlist',
             subtitle: 'Products you saved for later',
-            onTap:    () {},
+            onTap:    () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const WishlistScreen()),
+            ),
           ),
           _MenuTile(
             icon:     Icons.local_offer_outlined,
             label:    'Coupons & Offers',
             subtitle: 'View available discounts',
-            onTap:    () {},
+            onTap:    () => Helpers.showSnack(context, 'Coming soon!'),
           ),
 
           _SectionLabel(label: 'Settings & Support'),
@@ -145,19 +154,39 @@ class ProfileScreen extends StatelessWidget {
             icon:     Icons.notifications_outlined,
             label:    'Notifications',
             subtitle: 'Manage your alerts',
-            onTap:    () {},
+            onTap:    () => Helpers.showSnack(context, 'Notifications settings coming soon'),
           ),
           _MenuTile(
             icon:     Icons.help_outline,
             label:    'Help & Support',
             subtitle: 'FAQs and contact us',
-            onTap:    () {},
+            onTap:    () => showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text('Help & Support'),
+                content: const Text('For help, contact support@groceryapp.example'),
+                actions: [
+                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                ],
+              ),
+            ),
           ),
           _MenuTile(
             icon:     Icons.privacy_tip_outlined,
             label:    'Privacy Policy',
             subtitle: 'How we handle your data',
-            onTap:    () {},
+            onTap:    () => showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text('Privacy Policy'),
+                content: const SingleChildScrollView(
+                  child: Text('Privacy policy content goes here.'),
+                ),
+                actions: [
+                  TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+                ],
+              ),
+            ),
           ),
           _MenuTile(
             icon:     Icons.info_outline,

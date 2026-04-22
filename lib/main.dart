@@ -34,12 +34,45 @@ class GroceryApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
       ],
-      child: MaterialApp(
-        title: 'Grocery App',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
-        home: const SplashScreen(),
+      child: _RootGestureGuard(
+        child: MaterialApp(
+          title: 'Grocery App',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          home: const SplashScreen(),
+        ),
       ),
+    );
+  }
+}
+
+class _RootGestureGuard extends StatefulWidget {
+  final Widget child;
+  const _RootGestureGuard({required this.child});
+
+  @override
+  State<_RootGestureGuard> createState() => _RootGestureGuardState();
+}
+
+class _RootGestureGuardState extends State<_RootGestureGuard> {
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Defer interactions until first frame is rendered to avoid
+    // hit-testing RenderBoxes that haven't been laid out yet.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _ready = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: !_ready,
+      child: widget.child,
     );
   }
 }
