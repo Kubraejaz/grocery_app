@@ -273,6 +273,64 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 24),
+
+                        // ── Quick Presentation Mode ────────────
+                        Row(
+                          children: [
+                            const Expanded(child: Divider()),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: Text(
+                                'PRESENTATION DEMO',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey.shade500,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
+                            const Expanded(child: Divider()),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  side: const BorderSide(color: AppTheme.primary, width: 1.5),
+                                ),
+                                icon: const Icon(Icons.admin_panel_settings, color: AppTheme.primary, size: 20),
+                                label: const Text('Demo Admin', style: TextStyle(fontWeight: FontWeight.bold)),
+                                onPressed: () {
+                                  _emailCtrl.text = 'admin@store.com';
+                                  _passCtrl.text = 'admin123';
+                                  _login();
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  side: BorderSide(color: Colors.green.shade600, width: 1.5),
+                                ),
+                                icon: Icon(Icons.shopping_bag, color: Colors.green.shade600, size: 20),
+                                label: Text('Demo User', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade700)),
+                                onPressed: () {
+                                  _emailCtrl.text = 'user@store.com';
+                                  _passCtrl.text = 'user123';
+                                  _login();
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
