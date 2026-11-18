@@ -146,6 +146,117 @@ CREATE POLICY "Allow authenticated admin upload of product images"
   WITH CHECK (bucket_id = 'product-images');
 
 -- ==============================================================================
+-- 7. SEED INITIAL GROCERY CATEGORIES
+-- ==============================================================================
+INSERT INTO public.categories (id, name, color_hex) VALUES
+  ('11111111-1111-1111-1111-111111111111', 'Fresh Vegetables', '#4CAF50'),
+  ('22222222-2222-2222-2222-222222222222', 'Fresh Fruits', '#FF9800'),
+  ('33333333-3333-3333-3333-333333333333', 'Dairy & Eggs', '#2196F3'),
+  ('44444444-4444-4444-4444-444444444444', 'Bakery & Bread', '#795548'),
+  ('55555555-5555-5555-5555-555555555555', 'Beverages & Juices', '#E91E63')
+ON CONFLICT (id) DO NOTHING;
+
+-- ==============================================================================
+-- 8. SEED LIVE SAMPLE GROCERY PRODUCTS (Admin & User Test Data)
+-- ==============================================================================
+INSERT INTO public.products (id, name, description, price, discount_price, image_url, category_id, stock, unit, rating, review_count, is_featured, is_active) VALUES
+  (
+    'a1111111-1111-1111-1111-111111111111',
+    'Organic Farm Tomatoes',
+    'Locally harvested, vine-ripened organic red tomatoes. Rich in vitamins and lycopene.',
+    150,
+    120,
+    'https://images.unsplash.com/photo-1546470427-227c7369a924?w=500&auto=format&fit=crop&q=80',
+    '11111111-1111-1111-1111-111111111111',
+    50,
+    'kg',
+    4.8,
+    36,
+    true,
+    true
+  ),
+  (
+    'a2222222-2222-2222-2222-222222222222',
+    'Crisp Royal Gala Apples',
+    'Sweet and crunchy high-altitude apples. Hand-picked for top freshness.',
+    260,
+    220,
+    'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&auto=format&fit=crop&q=80',
+    '22222222-2222-2222-2222-222222222222',
+    35,
+    'kg',
+    4.9,
+    42,
+    true,
+    true
+  ),
+  (
+    'a3333333-3333-3333-3333-333333333333',
+    'Pure Dairy Whole Milk (1L)',
+    '100% natural, farm-fresh pasteurized whole milk pouch (1 Litre).',
+    180,
+    NULL,
+    'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=80',
+    '33333333-3333-3333-3333-333333333333',
+    60,
+    'litre',
+    4.7,
+    28,
+    false,
+    true
+  ),
+  (
+    'a4444444-4444-4444-4444-444444444444',
+    'Golden Honey Bananas',
+    'Naturally ripened sweet Cavendish bananas rich in potassium and fiber.',
+    120,
+    99,
+    'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=500&auto=format&fit=crop&q=80',
+    '22222222-2222-2222-2222-222222222222',
+    40,
+    'dozen',
+    4.8,
+    19,
+    true,
+    true
+  ),
+  (
+    'a5555555-5555-5555-5555-555555555555',
+    'Artisan Sourdough Loaf',
+    'Freshly baked daily using slow-fermented organic flour. Crispy crust and soft airy crumb.',
+    190,
+    160,
+    'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=80',
+    '44444444-4444-4444-4444-444444444444',
+    20,
+    'piece',
+    4.6,
+    15,
+    false,
+    true
+  ),
+  (
+    'a6666666-6666-6666-6666-666666666666',
+    'Farm Fresh Eggs (12 pcs)',
+    'Grade A clean white shell organic eggs from pasture-raised hens.',
+    250,
+    NULL,
+    'https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=500&auto=format&fit=crop&q=80',
+    '33333333-3333-3333-3333-333333333333',
+    45,
+    'dozen',
+    4.9,
+    64,
+    true,
+    true
+  )
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  price = EXCLUDED.price,
+  discount_price = EXCLUDED.discount_price,
+  stock = EXCLUDED.stock;
+
+-- ==============================================================================
 -- HOW TO PROMOTE A USER TO ADMIN:
 -- Run this query with the target user's email:
 -- UPDATE public.profiles SET user_type = 1 WHERE email = 'your_admin_email@example.com';

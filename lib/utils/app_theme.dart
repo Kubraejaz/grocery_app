@@ -47,15 +47,16 @@ class AppTheme {
       iconTheme: IconThemeData(color: Colors.white),
     ),
 
-    // // Cards
-    // cardTheme: CardTheme(
-    //   color: surface,
-    //   elevation: 2,
-    //   shadowColor: Colors.black.withOpacity(0.08),
-    //   shape: RoundedRectangleBorder(
-    //     borderRadius: BorderRadius.circular(16),
-    //   ),
-    // ),
+    // Cards
+    cardTheme: CardTheme(
+      color: surface,
+      elevation: 1,
+      shadowColor: Colors.black.withOpacity(0.06),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200, width: 1),
+      ),
+    ),
 
     // ElevatedButton
     elevatedButtonTheme: ElevatedButtonThemeData(
