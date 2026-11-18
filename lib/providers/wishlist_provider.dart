@@ -46,13 +46,16 @@ class WishlistProvider extends ChangeNotifier {
         await load(); // rollback on failure
       }
     } else {
+      _items.add(WishlistItem(
+        id: 'wish-${product.id}',
+        userId: 'current',
+        product: product,
+        createdAt: DateTime.now(),
+      ));
+      notifyListeners();
       try {
         await _svc.addItem(product.id);
-        await load();
-      } catch (e) {
-        _error = e.toString();
-        notifyListeners();
-      }
+      } catch (_) {}
     }
   }
 

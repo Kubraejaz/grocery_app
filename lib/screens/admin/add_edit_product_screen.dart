@@ -343,6 +343,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                     const SizedBox(height: 14),
 
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Price
                         Expanded(
@@ -350,16 +351,18 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                             controller: _priceCtrl,
                             keyboardType: TextInputType.number,
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Price (${AppText.currencySymbol}) *',
-                              prefixIcon: Icon(Icons.attach_money),
+                              prefixText: '${AppText.currencySymbol} ',
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                             ),
                             validator: (v) => (v == null || v.trim().isEmpty)
                                 ? 'Required'
                                 : null,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
 
                         // Discount Price
                         Expanded(
@@ -367,17 +370,20 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                             controller: _discCtrl,
                             keyboardType: TextInputType.number,
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               labelText: 'Discount (${AppText.currencySymbol})',
-                              prefixIcon: Icon(Icons.local_offer_outlined),
+                              prefixText: '${AppText.currencySymbol} ',
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
 
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Stock
                         Expanded(
@@ -387,27 +393,30 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                             decoration: const InputDecoration(
                               labelText: 'Stock Qty *',
-                              prefixIcon: Icon(Icons.inventory_2_outlined),
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                             ),
                             validator: (v) => (v == null || v.trim().isEmpty)
                                 ? 'Required'
                                 : null,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
 
                         // Unit
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             value: _selectedUnit,
+                            isExpanded: true,
                             decoration: const InputDecoration(
                               labelText: 'Unit *',
-                              prefixIcon: Icon(Icons.scale_outlined),
+                              isDense: true,
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                             ),
                             items: _units
                                 .map((u) => DropdownMenuItem(
                                       value: u,
-                                      child: Text(u),
+                                      child: Text(u, overflow: TextOverflow.ellipsis),
                                     ))
                                 .toList(),
                             onChanged: (val) {

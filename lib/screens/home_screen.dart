@@ -85,17 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : const Text('Grocery App'),
         actions: [
-          if (auth.isAdmin)
-            TextButton.icon(
-              icon: const Icon(Icons.admin_panel_settings, color: Colors.amber, size: 20),
-              label: const Text('Admin Panel', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AdminMainScreen()),
-                );
-              },
-            ),
           // Search toggle
           IconButton(
             icon: Icon(_showSearch ? Icons.close : Icons.search),

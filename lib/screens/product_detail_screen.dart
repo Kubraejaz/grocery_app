@@ -363,7 +363,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   onPressed: p.isInStock
                       ? () async {
                           for (int i = 0; i < _qty; i++) {
-                            await cart.add(p.id);
+                            await cart.add(p.id, p);
                           }
                           if (!context.mounted) return;
                           Helpers.showSnack(

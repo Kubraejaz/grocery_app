@@ -227,7 +227,7 @@ class ProductCard extends StatelessWidget {
                         InkWell(
                           onTap: product.isInStock
                               ? () async {
-                                  await cart.add(product.id);
+                                  await cart.add(product.id, product);
                                   if (!context.mounted) return;
                                   Helpers.showSnack(
                                     context,

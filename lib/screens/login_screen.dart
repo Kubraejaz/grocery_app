@@ -7,8 +7,8 @@ import '../providers/product_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/helpers.dart';
 import '../utils/validators.dart';
+import '../widgets/grocery_logo.dart';
 import 'admin/admin_main_screen.dart';
-import 'home_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -104,12 +104,11 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       } else {
-        // Map server error to correct field
         final err = auth.error ?? '';
         if (err.toLowerCase().contains('invalid login credentials') ||
             err.toLowerCase().contains('invalid credentials')) {
           setState(() {
-            _emailError = ' '; // space triggers red border without text
+            _emailError = ' ';
             _passError  = 'Incorrect email or password. Please try again.';
           });
         } else if (err.toLowerCase().contains('email')) {
@@ -131,78 +130,131 @@ class _LoginScreenState extends State<LoginScreen> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: const Color(0xFFF9FBF9),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // ── Header ────────────────────────────────────
-            Container(
-              width: double.infinity,
-              height: size.height * 0.30,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin:  Alignment.topLeft,
-                  end:    Alignment.bottomRight,
-                  colors: [AppTheme.primaryDark, AppTheme.primary],
-                ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft:  Radius.circular(40),
-                  bottomRight: Radius.circular(40),
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 80, height: 80,
-                    decoration: BoxDecoration(
-                      color:        Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(Icons.shopping_basket_rounded,
-                        size: 44, color: AppTheme.primary),
+            // ── Top Header with Green Wave, Badge & Brand ──
+            ClipPath(
+              clipper: _LoginHeaderClipper(),
+              child: Container(
+                width: double.infinity,
+                height: 250,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF2E7D32),
+                      Color(0xFF388E3C),
+                      Color(0xFF43A047),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  const Text('Grocery App',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold)),
-                ],
+                ),
+                child: Stack(
+                  children: [
+                    // Decorative floating leaves
+                    Positioned(
+                      top: 40,
+                      left: 20,
+                      child: Transform.rotate(
+                        angle: -0.4,
+                        child: Icon(Icons.eco,
+                            size: 32,
+                            color: Colors.white.withOpacity(0.2)),
+                      ),
+                    ),
+                    Positioned(
+                      top: 55,
+                      right: 25,
+                      child: Transform.rotate(
+                        angle: 0.6,
+                        child: Icon(Icons.eco,
+                            size: 40,
+                            color: Colors.white.withOpacity(0.22)),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 70,
+                      left: 45,
+                      child: Transform.rotate(
+                        angle: 0.2,
+                        child: Icon(Icons.eco,
+                            size: 26,
+                            color: Colors.white.withOpacity(0.18)),
+                      ),
+                    ),
+
+                    // Centered floating badge & Grocery App text
+                    SafeArea(
+                      bottom: false,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 8),
+                            // White rounded card with 3D cart logo
+                            const GroceryCartLogo(size: 80),
+                            const SizedBox(height: 10),
+                            const Text(
+                              'Grocery App',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
+            // ── Main Content Form ─────────────────────────
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 8),
-                  const Text('Welcome Back!',
-                      style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textDark)),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Welcome Back!',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1E293B),
+                      letterSpacing: -0.5,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  const Text('Sign in to continue shopping',
-                      style: TextStyle(color: AppTheme.textMuted)),
-                  const SizedBox(height: 28),
+                  const Text(
+                    'Sign in to continue shopping',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
 
                   Form(
                     key: _formKey,
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-
-                        // ── Email ───────────────────────────
+                        // ── Email Field ───────────────────────
                         TextFormField(
                           controller:   _emailCtrl,
                           keyboardType: TextInputType.emailAddress,
                           onChanged: (_) =>
                               setState(() => _emailError = null),
-                          decoration: InputDecoration(
-                            labelText:  'Email Address',
-                            hintText:   'you@example.com',
-                            prefixIcon: const Icon(Icons.email_outlined),
+                          decoration: _inputDecoration(
+                            hint: 'Email Address',
+                            icon: Icons.mail_outline_rounded,
                             errorText: _emailError?.trim().isEmpty == true
                                 ? null
                                 : _emailError,
@@ -211,125 +263,219 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // ── Password ────────────────────────
+                        // ── Password Field ────────────────────
                         TextFormField(
                           controller:  _passCtrl,
                           obscureText: _obscure,
                           onChanged:   (_) =>
                               setState(() => _passError = null),
-                          decoration: InputDecoration(
-                            labelText:  'Password',
-                            hintText:   'Your password',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            errorText:  _passError,
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscure
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined),
+                          decoration: _inputDecoration(
+                            hint: 'Password',
+                            icon: Icons.lock_outline_rounded,
+                            errorText: _passError,
+                            suffix: IconButton(
+                              icon: Icon(
+                                _obscure
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: const Color(0xFF9E9E9E),
+                                size: 20,
+                              ),
                               onPressed: () =>
                                   setState(() => _obscure = !_obscure),
                             ),
                           ),
                           validator: (v) {
-                            if (v == null || v.isEmpty)
+                            if (v == null || v.isEmpty) {
                               return 'Password is required';
-                            if (v.length < 6)
+                            }
+                            if (v.length < 6) {
                               return 'Password must be at least 6 characters';
+                            }
                             return null;
                           },
                         ),
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 24),
 
-                        ElevatedButton(
-                          onPressed: auth.loading ? null : _login,
-                          child: auth.loading
-                              ? const SizedBox(
-                                  height: 22, width: 22,
-                                  child: CircularProgressIndicator(
+                        // ── Login Pill Button ─────────────────
+                        Container(
+                          width: double.infinity,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF2E7D32), Color(0xFF43A047)],
+                            ),
+                            borderRadius: BorderRadius.circular(26),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF2E7D32).withOpacity(0.35),
+                                blurRadius: 12,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(26),
+                              ),
+                            ),
+                            onPressed: auth.loading ? null : _login,
+                            child: auth.loading
+                                ? const SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
                                       color: Colors.white,
-                                      strokeWidth: 2))
-                              : const Text('Login'),
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Login',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(width: 8),
+                                      Icon(
+                                        Icons.arrow_forward_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ],
+                                  ),
+                          ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 18),
 
+                        // ── Don't have an account? Register ───
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text("Don't have an account?  ",
-                                style: TextStyle(
-                                    color: AppTheme.textMuted)),
+                            const Text(
+                              "Don't have an account? ",
+                              style: TextStyle(
+                                color: Color(0xFF6B7280),
+                                fontSize: 13,
+                              ),
+                            ),
                             GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (_) =>
-                                        const RegisterScreen()),
+                                  builder: (_) => const RegisterScreen(),
+                                ),
                               ),
-                              child: const Text('Register',
-                                  style: TextStyle(
-                                      color: AppTheme.primary,
-                                      fontWeight: FontWeight.w700)),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-
-                        // ── Quick Presentation Mode ────────────
-                        Row(
-                          children: [
-                            const Expanded(child: Divider()),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              child: Text(
-                                'PRESENTATION DEMO',
+                              child: const Text(
+                                'Register',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  color: Color(0xFF2E7D32),
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.grey.shade500,
-                                  letterSpacing: 1.2,
+                                  fontSize: 14,
                                 ),
                               ),
                             ),
-                            const Expanded(child: Divider()),
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 16),
 
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  side: const BorderSide(color: AppTheme.primary, width: 1.5),
-                                ),
-                                icon: const Icon(Icons.admin_panel_settings, color: AppTheme.primary, size: 20),
-                                label: const Text('Demo Admin', style: TextStyle(fontWeight: FontWeight.bold)),
-                                onPressed: () {
-                                  _emailCtrl.text = 'admin@store.com';
-                                  _passCtrl.text = 'admin123';
-                                  _login();
-                                },
+                        // ── Presentation Demo Shortcuts ─────────
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                                color: const Color(0xFFE2E8F0), width: 1),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.flash_on_rounded,
+                                      color: Color(0xFFFF9800), size: 16),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '1-Click Demo Login (Presentation Mode)',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  side: BorderSide(color: Colors.green.shade600, width: 1.5),
-                                ),
-                                icon: Icon(Icons.shopping_bag, color: Colors.green.shade600, size: 20),
-                                label: Text('Demo User', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade700)),
-                                onPressed: () {
-                                  _emailCtrl.text = 'user@store.com';
-                                  _passCtrl.text = 'user123';
-                                  _login();
-                                },
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8),
+                                        side: const BorderSide(
+                                            color: Color(0xFF2E7D32)),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        _emailCtrl.text = 'admin@store.com';
+                                        _passCtrl.text = 'admin123';
+                                        _login();
+                                      },
+                                      child: const Text(
+                                        'Demo Admin',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF2E7D32),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8),
+                                        side: const BorderSide(
+                                            color: Color(0xFF388E3C)),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        _emailCtrl.text = 'user@store.com';
+                                        _passCtrl.text = 'user123';
+                                        _login();
+                                      },
+                                      child: const Text(
+                                        'Demo User',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF388E3C),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -337,9 +483,270 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
+
+            const SizedBox(height: 16),
+
+            // ── Bottom Illustration (Grocery Paper Bag & Wave Hill) ──
+            const _BottomGroceryIllustration(),
           ],
         ),
       ),
     );
   }
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData icon,
+    String? errorText,
+    Widget? suffix,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 14),
+      prefixIcon: Icon(icon, color: const Color(0xFF757575), size: 20),
+      suffixIcon: suffix,
+      errorText: errorText,
+      filled: true,
+      fillColor: Colors.white,
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 1.8),
+      ),
+    );
+  }
+}
+
+// ── Organic Wave Clipper for Login Header ──
+class _LoginHeaderClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(0, size.height - 40);
+
+    final p1 = Offset(size.width * 0.28, size.height);
+    final p2 = Offset(size.width * 0.58, size.height - 25);
+    path.quadraticBezierTo(p1.dx, p1.dy, p2.dx, p2.dy);
+
+    final p3 = Offset(size.width * 0.82, size.height - 46);
+    final p4 = Offset(size.width, size.height - 20);
+    path.quadraticBezierTo(p3.dx, p3.dy, p4.dx, p4.dy);
+
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+// ── Bottom Grocery Bag Illustration with Fresh Produce & Hills ──
+class _BottomGroceryIllustration extends StatelessWidget {
+  const _BottomGroceryIllustration();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 140,
+      width: double.infinity,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        clipBehavior: Clip.none,
+        children: [
+          // Background soft green rolling hill
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: ClipPath(
+              clipper: _BottomHillClipper(),
+              child: Container(
+                height: 80,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF81C784), Color(0xFF4CAF50)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Floating leaves on sides
+          Positioned(
+            bottom: 30,
+            left: 20,
+            child: Transform.rotate(
+              angle: -0.3,
+              child: const Icon(Icons.eco, color: Color(0xFF2E7D32), size: 30),
+            ),
+          ),
+          Positioned(
+            bottom: 40,
+            right: 25,
+            child: Transform.rotate(
+              angle: 0.4,
+              child: const Icon(Icons.eco, color: Color(0xFF388E3C), size: 36),
+            ),
+          ),
+
+          // Centered Grocery Bag
+          Positioned(
+            bottom: 8,
+            child: Container(
+              width: 140,
+              height: 120,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD29860), // Kraft paper bag
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Fold line on paper bag
+                  Positioned(
+                    top: 14,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 1.5,
+                      color: const Color(0xFFB57C42),
+                    ),
+                  ),
+                  // Paper bag handle cutout
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 22),
+                      width: 44,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFB57C42),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                  ),
+
+                  // Fresh Veggies poking out from top
+                  Positioned(
+                    top: -24,
+                    left: 10,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Fresh green lettuce / broccoli cluster
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF43A047),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.grass_rounded,
+                              color: Colors.white70, size: 20),
+                        ),
+                        const SizedBox(width: 4),
+                        // Red shiny tomato
+                        Container(
+                          width: 26,
+                          height: 26,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE53935),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(Icons.eco,
+                                color: Colors.green, size: 10),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Golden Baguette / Bread loaf
+                        Transform.rotate(
+                          angle: 0.25,
+                          child: Container(
+                            width: 18,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFD7A15C),
+                              borderRadius: BorderRadius.circular(9),
+                              border: Border.all(
+                                  color: const Color(0xFFBF843B), width: 1),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Milk bottle
+                        Container(
+                          width: 16,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                                color: const Color(0xFFBBDEFB), width: 1.5),
+                          ),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Container(
+                              width: 12,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF1976D2),
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(2)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomHillClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(0, 30);
+    path.quadraticBezierTo(size.width * 0.35, 0, size.width * 0.65, 20);
+    path.quadraticBezierTo(size.width * 0.85, 35, size.width, 15);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

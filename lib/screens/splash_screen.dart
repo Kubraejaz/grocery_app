@@ -1,10 +1,11 @@
 // lib/screens/splash_screen.dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
-import '../utils/app_theme.dart';
+import '../widgets/grocery_logo.dart';
 import 'admin/admin_main_screen.dart';
 import 'login_screen.dart';
 import 'main_screen.dart';
@@ -22,7 +23,6 @@ class _SplashScreenState extends State<SplashScreen>
   late final AnimationController _ctrl;
   late final Animation<double>   _fadeAnim;
   late final Animation<double>   _scaleAnim;
-  late final Animation<double>   _slideAnim;
 
   @override
   void initState() {
@@ -30,25 +30,18 @@ class _SplashScreenState extends State<SplashScreen>
 
     _ctrl = AnimationController(
       vsync:    this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1400),
     );
 
     _fadeAnim = CurvedAnimation(
       parent: _ctrl,
-      curve:  const Interval(0.0, 0.6, curve: Curves.easeIn),
+      curve:  const Interval(0.0, 0.7, curve: Curves.easeIn),
     );
 
-    _scaleAnim = Tween<double>(begin: 0.6, end: 1.0).animate(
+    _scaleAnim = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         parent: _ctrl,
-        curve:  const Interval(0.0, 0.7, curve: Curves.elasticOut),
-      ),
-    );
-
-    _slideAnim = Tween<double>(begin: 30, end: 0).animate(
-      CurvedAnimation(
-        parent: _ctrl,
-        curve:  const Interval(0.3, 0.9, curve: Curves.easeOut),
+        curve:  const Interval(0.0, 0.8, curve: Curves.elasticOut),
       ),
     );
 
@@ -57,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _navigate() async {
-    await Future.delayed(const Duration(milliseconds: 2400));
+    await Future.delayed(const Duration(milliseconds: 2800));
     if (!mounted) return;
 
     final prefs = await SharedPreferences.getInstance();
@@ -106,107 +99,172 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end:   Alignment.bottomRight,
-            colors: [
-              AppTheme.primaryDark,
-              AppTheme.primary,
-              AppTheme.primaryLight,
-            ],
+      backgroundColor: const Color(0xFFFBFDFB),
+      body: Stack(
+        children: [
+          // ── Top Decorative Organic Green Wave ─────────────────
+          Positioned(
+            top: -50,
+            left: -40,
+            right: -40,
+            child: Container(
+              height: 220,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFE8F5E9),
+                    Color(0xFFC8E6C9),
+                    Color(0xFFE8F5E9),
+                  ],
+                ),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.elliptical(320, 140),
+                ),
+              ),
+            ),
           ),
-        ),
-        child: Center(
-          child: AnimatedBuilder(
-            animation: _ctrl,
-            builder: (_, __) => Column(
-              mainAxisSize: MainAxisSize.min,
+
+          // ── Floating Leaves Accents ───────────────────────────
+          Positioned(
+            top: 60,
+            right: 28,
+            child: Transform.rotate(
+              angle: 0.4,
+              child: const Icon(Icons.eco_rounded, color: Color(0xFF81C784), size: 30),
+            ),
+          ),
+          Positioned(
+            top: 130,
+            left: 20,
+            child: Transform.rotate(
+              angle: -0.6,
+              child: const Icon(Icons.eco_rounded, color: Color(0xFFA5D6A7), size: 24),
+            ),
+          ),
+
+          // ── Center Content ────────────────────────────────────
+          SafeArea(
+            child: Column(
               children: [
-                // ── Logo icon ──────────────────────────────
+                const Spacer(flex: 2),
+
+                // ── Animated 3D Grocery Cart Logo ─────────────────
                 FadeTransition(
                   opacity: _fadeAnim,
                   child: ScaleTransition(
                     scale: _scaleAnim,
-                    child: Container(
-                      width:  110,
-                      height: 110,
-                      decoration: BoxDecoration(
-                        color:        Colors.white,
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color:      Colors.black.withOpacity(0.2),
-                            blurRadius: 24,
-                            offset:     const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.shopping_basket_rounded,
-                        size:  60,
-                        color: AppTheme.primary,
-                      ),
-                    ),
+                    child: const GroceryCartLogo(size: 130),
                   ),
                 ),
+                const SizedBox(height: 24),
 
-                const SizedBox(height: 28),
-
-                // ── App name ───────────────────────────────
-                Transform.translate(
-                  offset: Offset(0, _slideAnim.value),
-                  child: FadeTransition(
-                    opacity: _fadeAnim,
-                    child: const Text(
-                      'Grocery App',
-                      style: TextStyle(
-                        color:          Colors.white,
-                        fontSize:       34,
-                        fontWeight:     FontWeight.bold,
-                        letterSpacing:  1.5,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // ── Tagline ────────────────────────────────
-                Transform.translate(
-                  offset: Offset(0, _slideAnim.value),
-                  child: FadeTransition(
-                    opacity: _fadeAnim,
-                    child: const Text(
-                      'Fresh. Fast. Delivered.',
-                      style: TextStyle(
-                        color:       Colors.white70,
-                        fontSize:    16,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 60),
-
-                // ── Loader ─────────────────────────────────
+                // ── Branding Title ────────────────────────────────
                 FadeTransition(
                   opacity: _fadeAnim,
-                  child: const SizedBox(
-                    width:  28,
-                    height: 28,
-                    child:  CircularProgressIndicator(
-                      color:       Colors.white60,
-                      strokeWidth: 2.5,
+                  child: const GroceryBrandTitle(fontSize: 38),
+                ),
+                const SizedBox(height: 12),
+
+                // ── Subtitle ──────────────────────────────────────
+                FadeTransition(
+                  opacity: _fadeAnim,
+                  child: const Column(
+                    children: [
+                      Text(
+                        'Fresh Groceries',
+                        style: TextStyle(
+                          color: Color(0xFF455A64),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Text(
+                        'Delivered to Your Door',
+                        style: TextStyle(
+                          color: Color(0xFF78909C),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Spacer(flex: 2),
+
+                // ── Fresh Produce Basket Image ────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: CachedNetworkImage(
+                      imageUrl:
+                          'https://images.unsplash.com/photo-1542838132-92c53300491e?w=700&auto=format&fit=crop&q=80',
+                      height: 180,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                        height: 180,
+                        color: const Color(0xFFE8F5E9),
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF4CAF50),
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) => Container(
+                        height: 180,
+                        color: const Color(0xFFE8F5E9),
+                        child: const Icon(Icons.shopping_basket,
+                            size: 64, color: Color(0xFF4CAF50)),
+                      ),
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
+
+                // ── 3 Dots Carousel Indicator ─────────────────────
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFC8E6C9),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      width: 22,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2E7D32),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFC8E6C9),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

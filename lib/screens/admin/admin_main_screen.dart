@@ -2,10 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/product_provider.dart';
 import '../../utils/app_theme.dart';
 import '../login_screen.dart';
-import '../main_screen.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_products_screen.dart';
@@ -103,22 +101,9 @@ class _AdminSettingsTab extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.storefront_outlined, color: AppTheme.primary),
-                  title: const Text('View Customer Store'),
-                  subtitle: const Text('Preview products as seen by customers'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    context.read<ProductProvider>().refresh();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const MainScreen()),
-                    );
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
                   leading: const Icon(Icons.logout, color: AppTheme.error),
-                  title: const Text('Sign Out', style: TextStyle(color: AppTheme.error)),
+                  title: const Text('Sign Out', style: TextStyle(color: AppTheme.error, fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Log out of admin session'),
                   onTap: () async {
                     await auth.signOut();
                     if (!context.mounted) return;

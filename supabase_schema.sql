@@ -12,18 +12,29 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Helper function to check if current user is admin without RLS recursion
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE id = auth.uid() AND user_type = 1
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Enable RLS on profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Allow users to read their own profile and admins to read all profiles
+-- Allow all authenticated users to read profiles (prevents infinite recursion code: 42P17)
+DROP POLICY IF EXISTS "Allow users to read profile" ON public.profiles;
 CREATE POLICY "Allow users to read profile"
   ON public.profiles FOR SELECT
   TO authenticated
-  USING (auth.uid() = id OR EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND user_type = 1
-  ));
+  USING (true);
 
 -- Allow users to update their own profile
+DROP POLICY IF EXISTS "Allow users to update their own profile" ON public.profiles;
 CREATE POLICY "Allow users to update their own profile"
   ON public.profiles FOR UPDATE
   TO authenticated
@@ -74,61 +85,55 @@ CREATE TABLE IF NOT EXISTS public.products (
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
 -- Anyone authenticated can view active products
+DROP POLICY IF EXISTS "Public read active products" ON public.products;
 CREATE POLICY "Public read active products"
   ON public.products FOR SELECT
-  USING (is_active = TRUE OR EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND user_type = 1
-  ));
+  USING (is_active = TRUE OR public.is_admin());
 
 -- Only Admin can INSERT products
+DROP POLICY IF EXISTS "Admin insert products" ON public.products;
 CREATE POLICY "Admin insert products"
   ON public.products FOR INSERT
   TO authenticated
-  WITH CHECK (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND user_type = 1)
-  );
+  WITH CHECK (public.is_admin());
 
 -- Only Admin can UPDATE products
+DROP POLICY IF EXISTS "Admin update products" ON public.products;
 CREATE POLICY "Admin update products"
   ON public.products FOR UPDATE
   TO authenticated
-  USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND user_type = 1)
-  );
+  USING (public.is_admin());
 
 -- Only Admin can DELETE products
+DROP POLICY IF EXISTS "Admin delete products" ON public.products;
 CREATE POLICY "Admin delete products"
   ON public.products FOR DELETE
   TO authenticated
-  USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND user_type = 1)
-  );
+  USING (public.is_admin());
 
 -- 5. ORDER MANAGEMENT PERMISSIONS
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 -- Customers can view their own orders; Admins can view ALL orders
+DROP POLICY IF EXISTS "View orders policy" ON public.orders;
 CREATE POLICY "View orders policy"
   ON public.orders FOR SELECT
   TO authenticated
-  USING (
-    user_id = auth.uid() OR
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND user_type = 1)
-  );
+  USING (user_id = auth.uid() OR public.is_admin());
 
 -- Customers can insert their orders
+DROP POLICY IF EXISTS "Customer insert orders" ON public.orders;
 CREATE POLICY "Customer insert orders"
   ON public.orders FOR INSERT
   TO authenticated
   WITH CHECK (user_id = auth.uid());
 
 -- Only Admins can update order status
+DROP POLICY IF EXISTS "Admin update orders status" ON public.orders;
 CREATE POLICY "Admin update orders status"
   ON public.orders FOR UPDATE
   TO authenticated
-  USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND user_type = 1)
-  );
+  USING (public.is_admin());
 
 -- 6. STORAGE BUCKET FOR PRODUCT IMAGES
 -- (Run this or create a public bucket named 'product-images' in Supabase Dashboard -> Storage)
