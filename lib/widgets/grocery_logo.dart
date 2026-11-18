@@ -1,137 +1,72 @@
 // lib/widgets/grocery_logo.dart
 import 'package:flutter/material.dart';
 
-class GroceryCartLogo extends StatelessWidget {
+/// Official 3D Grocery App Logo loaded from high-res asset
+class OfficialAppLogo extends StatelessWidget {
   final double size;
-  const GroceryCartLogo({super.key, this.size = 110});
+  final bool withShadow;
+
+  const OfficialAppLogo({
+    super.key,
+    this.size = 100,
+    this.withShadow = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(size * 0.28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Background soft glow
-          Container(
-            width: size * 0.75,
-            height: size * 0.75,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8F5E9),
-              borderRadius: BorderRadius.circular(size * 0.2),
-            ),
-          ),
-
-          // Cart Graphics
-          Padding(
-            padding: EdgeInsets.all(size * 0.12),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Fresh veggies top
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: size * 0.14,
-                      height: size * 0.18,
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade600,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    Container(
-                      width: size * 0.14,
-                      height: size * 0.22,
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade700,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    Container(
-                      width: size * 0.12,
-                      height: size * 0.24,
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade300,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(width: 2),
-                    Container(
-                      width: size * 0.14,
-                      height: size * 0.20,
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade700,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-
-                // Green Shopping Cart body
-                Container(
-                  width: size * 0.52,
-                  height: size * 0.26,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2E7D32),
-                    borderRadius: BorderRadius.circular(size * 0.08),
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: size * 0.40,
-                      height: size * 0.16,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF43A047),
-                        borderRadius: BorderRadius.circular(size * 0.06),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 3),
-
-                // Cart Wheels
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: size * 0.10,
-                      height: size * 0.10,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF1B5E20),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    SizedBox(width: size * 0.24),
-                    Container(
-                      width: size * 0.10,
-                      height: size * 0.10,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF1B5E20),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ],
+      decoration: withShadow
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(size * 0.24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.12),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
                 ),
               ],
-            ),
-          ),
-        ],
+            )
+          : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.24),
+        child: Image.asset(
+          'assets/images/app_logo.png',
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => GroceryCartLogo(size: size),
+        ),
       ),
+    );
+  }
+}
+
+class GroceryCartLogo extends StatelessWidget {
+  final double size;
+  const GroceryCartLogo({super.key, this.size = 110});
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      'assets/images/app_logo.png',
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => _fallbackCart(size),
+    );
+  }
+
+  Widget _fallbackCart(double s) {
+    return Container(
+      width: s,
+      height: s,
+      decoration: BoxDecoration(
+        color: const Color(0xFF43A047),
+        borderRadius: BorderRadius.circular(s * 0.24),
+      ),
+      child: Icon(Icons.shopping_cart_rounded, color: Colors.white, size: s * 0.55),
     );
   }
 }
@@ -216,4 +151,3 @@ class _SmileCurvePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-

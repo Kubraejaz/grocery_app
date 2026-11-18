@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../models/category.dart';
 import '../models/product.dart';
+import '../services/admin_service.dart';
 import '../services/product_service.dart';
 
 class ProductProvider extends ChangeNotifier {
@@ -44,15 +45,38 @@ class ProductProvider extends ChangeNotifier {
         _products = _getMockProducts();
         _featured = _products.where((p) => p.isFeatured).toList();
       }
+      _mergeSessionProducts();
     } catch (_) {
       // Failsafe fallback so presentation is always populated even offline
       _categories = _getMockCategories();
       _products   = _getMockProducts();
       _featured   = _products.where((p) => p.isFeatured).toList();
+      _mergeSessionProducts();
       _error      = null;
     } finally {
       _setLoading(false);
     }
+  }
+
+  void _mergeSessionProducts() {
+    for (final p in AdminService.sessionAddedProducts) {
+      if (!_products.any((x) => x.id == p.id)) {
+        _products.insert(0, p);
+        if (p.isFeatured && !_featured.any((x) => x.id == p.id)) {
+          _featured.insert(0, p);
+        }
+      }
+    }
+  }
+
+  void addOptimisticProduct(Product p) {
+    _products.removeWhere((x) => x.id == p.id);
+    _products.insert(0, p);
+    if (p.isFeatured) {
+      _featured.removeWhere((x) => x.id == p.id);
+      _featured.insert(0, p);
+    }
+    notifyListeners();
   }
 
   // ── Reload products only ──────────────────────────────────

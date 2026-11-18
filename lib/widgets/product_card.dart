@@ -53,18 +53,18 @@ class ProductCard extends StatelessWidget {
                   tag: 'product-${product.id}',
                   child: CachedNetworkImage(
                     imageUrl: product.imageUrl,
-                    height:   140,
+                    height:   120,
                     width:    double.infinity,
                     fit:      BoxFit.cover,
                     placeholder: (_, __) => Container(
-                      height: 140,
+                      height: 120,
                       color:  Colors.grey.shade100,
                       child:  const Center(
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                     ),
                     errorWidget: (_, __, ___) => Container(
-                      height: 140,
+                      height: 120,
                       color:  Colors.grey.shade100,
                       child:  const Icon(Icons.image_not_supported_outlined,
                           size: 44, color: Colors.grey),

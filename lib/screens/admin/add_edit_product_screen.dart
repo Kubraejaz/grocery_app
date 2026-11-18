@@ -195,7 +195,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           isActive:      _isActive,
         );
       } else {
-        await _adminSvc.createProduct(
+        final created = await _adminSvc.createProduct(
           name:          _nameCtrl.text.trim(),
           description:   _descCtrl.text.trim(),
           price:         price,
@@ -206,6 +206,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           unit:          _selectedUnit,
           isFeatured:    _isFeatured,
         );
+        if (mounted) {
+          context.read<ProductProvider>().addOptimisticProduct(created);
+        }
       }
 
       // Immediately refresh ProductProvider so customer dashboard updates live

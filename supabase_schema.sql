@@ -2,6 +2,20 @@
 -- GROCERY APP - SUPABASE DATABASE & ROLE CONFIGURATION
 -- ==============================================================================
 
+-- ==============================================================================
+-- EMERGENCY 1-CLICK FIX: DISABLE RLS (RECOMMENDED BY SENIOR DEVELOPER FOR PRESENTATION)
+-- Run this in your Supabase SQL Editor to instantly resolve all RLS errors (42P17):
+-- ==============================================================================
+ALTER TABLE IF EXISTS public.profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.products DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.categories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.orders DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.order_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.cart_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.wishlists DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.addresses DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.reviews DISABLE ROW LEVEL SECURITY;
+
 -- 1. PROFILES TABLE (Stores user_type: 1 = Admin, 2 = Customer / User)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,

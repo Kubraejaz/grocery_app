@@ -199,44 +199,54 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                     return Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       child: ExpansionTile(
-                        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         leading: CircleAvatar(
                           backgroundColor: color.withOpacity(0.12),
-                          child: Icon(Icons.shopping_bag, color: color),
+                          child: Icon(Icons.shopping_bag, color: color, size: 20),
                         ),
-                        title: Text(
-                          'Order #${o.id.substring(0, 8).toUpperCase()}',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        title: Row(
                           children: [
-                            const SizedBox(height: 4),
-                            Text(
-                              '${AppText.currencySymbol} ${o.totalAmount.toStringAsFixed(0)} • ${Helpers.formatDate(o.createdAt)}',
-                              style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textDark),
+                            Expanded(
+                              child: Text(
+                                'Order #${o.id.substring(0, 8).toUpperCase()}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                            const SizedBox(height: 4),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: color.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 Helpers.capitalize(o.status.name),
-                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color),
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: color),
                               ),
                             ),
                           ],
                         ),
-                        trailing: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            textStyle: const TextStyle(fontSize: 12),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            '${AppText.currencySymbol} ${o.totalAmount.toStringAsFixed(0)} • ${Helpers.formatDate(o.createdAt)}',
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: AppTheme.textDark),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          onPressed: () => _showStatusDialog(o),
-                          child: const Text('Update'),
+                        ),
+                        trailing: InkWell(
+                          onTap: () => _showStatusDialog(o),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text('Status', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                          ),
                         ),
                         children: [
                           const Divider(height: 1),

@@ -252,12 +252,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(
-                      color: Colors.white24,
-                      shape: BoxShape.circle,
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.person_add_alt_1, color: Colors.white, size: 20),
+                    padding: const EdgeInsets.all(2),
+                    child: Image.asset(
+                      'assets/images/app_logo.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   const Expanded(

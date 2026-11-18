@@ -205,7 +205,7 @@ class CartScreen extends StatelessWidget {
 
                 // ── Order summary footer ────────────────────
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: const BorderRadius.only(
@@ -221,24 +221,26 @@ class CartScreen extends StatelessWidget {
                     ],
                   ),
                   child: SafeArea(
+                    top: false,
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         _SummaryRow(
                           label: 'Subtotal (${cart.distinctCount} items)',
                           value: Helpers.formatPrice(cart.totalAmount),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         const _SummaryRow(
                           label:      'Delivery Fee',
                           value:      'Free',
                           valueColor: AppTheme.success,
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                         const _SummaryRow(
                           label: 'Discount',
                           value: '₨ 0.00',
                         ),
-                        const Divider(height: 20),
+                        const Divider(height: 14),
                         Row(
                           mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
@@ -247,7 +249,7 @@ class CartScreen extends StatelessWidget {
                               'Total Amount',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize:   16,
+                                fontSize:   15,
                                 color:      AppTheme.textDark,
                               ),
                             ),
@@ -255,13 +257,13 @@ class CartScreen extends StatelessWidget {
                               Helpers.formatPrice(cart.totalAmount),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize:   20,
+                                fontSize:   18,
                                 color:      AppTheme.primary,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         ElevatedButton.icon(
                           onPressed: () => Navigator.push(
                             context,
