@@ -56,7 +56,7 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
       children: [
         // ── Banner slides ──────────────────────────────────
         SizedBox(
-          height: 170,
+          height: 185,
           // Listener wraps PageView — detects drag start/end
           // so we pause auto-slide while user is swiping
           child: GestureDetector(
@@ -117,12 +117,13 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
                             // ── Text side ──────────────────
                             Expanded(
                               child: Padding(
-                                padding: const EdgeInsets.all(20),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.start,
                                   mainAxisAlignment:
                                       MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     // Featured tag
                                     Container(
@@ -217,7 +218,7 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
                             CachedNetworkImage(
                               imageUrl: p.imageUrl,
                               width:    130,
-                              height:   170,
+                              height:   185,
                               fit:      BoxFit.cover,
                               placeholder: (_, __) => Container(
                                 width: 130,
