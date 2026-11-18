@@ -1,5 +1,7 @@
 // lib/services/auth_service.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/user_profile.dart';
+import '../utils/constants.dart';
 
 class AuthService {
   final _client = Supabase.instance.client;
@@ -14,6 +16,36 @@ class AuthService {
 
   Stream<AuthState> get authStream => _client.auth.onAuthStateChange;
 
+  // ── Profile ───────────────────────────────────────────────
+  Future<UserProfile?> fetchProfile() async {
+    final uid = currentUser?.id;
+    if (uid == null) return null;
+
+    try {
+      final res = await _client
+          .from(Tables.profiles)
+          .select()
+          .eq('id', uid)
+          .maybeSingle();
+
+      if (res != null) {
+        return UserProfile.fromJson(res);
+      }
+    } catch (_) {
+      // Fallback if profiles table is not yet migrated
+    }
+
+    // Fallback: check user metadata or default to regular customer
+    final metaType = (currentUser?.userMetadata?['user_type'] as num?)?.toInt() ?? UserTypes.user;
+    return UserProfile(
+      id:        uid,
+      fullName:  userName,
+      email:     userEmail,
+      userType:  metaType,
+      createdAt: DateTime.now(),
+    );
+  }
+
   // ── Sign Up ───────────────────────────────────────────────
   // Returns true  → registered AND logged in (email confirm OFF)
   // Returns false → email confirmation required
@@ -22,24 +54,34 @@ class AuthService {
     required String email,
     required String password,
     required String fullName,
+    int userType = UserTypes.user,
   }) async {
     final response = await _client.auth.signUp(
       email:    email,
       password: password,
-      data:     {'full_name': fullName},
+      data: {
+        'full_name': fullName,
+        'user_type': userType,
+      },
     );
 
-    // If session is null, Supabase is waiting for email confirmation
-    if (response.session == null) {
-      return false; // needs email confirmation
+    // If session exists, also ensure profile record is inserted
+    if (response.session != null && response.user != null) {
+      try {
+        await _client.from(Tables.profiles).upsert({
+          'id':        response.user!.id,
+          'full_name': fullName,
+          'email':     email,
+          'user_type': userType,
+        });
+      } catch (_) {}
+      return true;
     }
 
-    // Session exists → user is logged in immediately
-    return true;
+    return false; // needs email confirmation
   }
 
   // ── Sign In ───────────────────────────────────────────────
-  // Throws AuthException on wrong credentials or unconfirmed email
   Future<bool> signIn({
     required String email,
     required String password,
@@ -49,7 +91,6 @@ class AuthService {
       password: password,
     );
 
-    // Must have a valid session to be considered logged in
     return response.session != null;
   }
 

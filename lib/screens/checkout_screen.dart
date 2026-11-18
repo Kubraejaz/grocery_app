@@ -8,7 +8,6 @@ import '../services/order_service.dart';
 import '../utils/app_theme.dart';
 import '../utils/helpers.dart';
 import '../utils/validators.dart';
-import 'home_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});

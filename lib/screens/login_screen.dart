@@ -7,6 +7,7 @@ import '../providers/product_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/helpers.dart';
 import '../utils/validators.dart';
+import 'admin/admin_main_screen.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 
@@ -49,10 +50,18 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       await context.read<ProductProvider>().init();
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-      );
+
+      if (auth.isAdmin) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminMainScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+        );
+      }
     } else {
       if (auth.needsConfirmation) {
         showDialog(

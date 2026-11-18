@@ -41,6 +41,17 @@ class OrderService {
           .toList(),
     );
 
+    // 3. Decrement product stock
+    for (final item in items) {
+      try {
+        final newStock = (item.product.stock - item.quantity).clamp(0, 999999);
+        await _db
+            .from(Tables.products)
+            .update({'stock': newStock})
+            .eq('id', item.product.id);
+      } catch (_) {}
+    }
+
     return orderId;
   }
 

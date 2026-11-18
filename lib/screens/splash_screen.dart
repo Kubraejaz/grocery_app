@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../providers/product_provider.dart';
 import '../utils/app_theme.dart';
+import 'admin/admin_main_screen.dart';
 import 'login_screen.dart';
 import 'main_screen.dart';
 import 'onboarding_screen.dart';
@@ -72,12 +73,22 @@ class _SplashScreenState extends State<SplashScreen>
 
     final auth = context.read<AuthProvider>();
     if (auth.loggedIn) {
+      await auth.loadProfile();
+      if (!mounted) return;
       await context.read<ProductProvider>().init();
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-      );
+
+      if (auth.isAdmin) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminMainScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+        );
+      }
     } else {
       Navigator.pushReplacement(
         context,

@@ -4,6 +4,7 @@ import 'package:grocery_app/utils/helpers.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/app_theme.dart';
+import 'admin/admin_main_screen.dart';
 import 'login_screen.dart';
 import 'orders_screen.dart';
 import 'wishlist_screen.dart';
@@ -96,11 +97,12 @@ class ProfileScreen extends StatelessWidget {
                           color:        Colors.white24,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Text(
-                          'Premium Member',
-                          style: TextStyle(
+                        child: Text(
+                          auth.isAdmin ? 'Administrator (Role 1)' : 'Customer (Role 2)',
+                          style: const TextStyle(
                             color:   Colors.white,
                             fontSize: 11,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
@@ -110,6 +112,22 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
           ),
+
+          // ── Admin Panel Shortcut (if Admin) ───────────
+          if (auth.isAdmin) ...[
+            _SectionLabel(label: 'Administration'),
+            _MenuTile(
+              icon: Icons.admin_panel_settings,
+              label: 'Admin Dashboard',
+              subtitle: 'Manage items, inventory & orders',
+              iconColor: AppTheme.primary,
+              labelColor: AppTheme.primary,
+              onTap: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const AdminMainScreen()),
+              ),
+            ),
+          ],
 
           // ── My Account ────────────────────────────────
           _SectionLabel(label: 'My Account'),

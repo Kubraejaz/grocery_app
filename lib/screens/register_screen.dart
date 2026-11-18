@@ -7,8 +7,10 @@ import '../providers/product_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/helpers.dart';
 import '../utils/validators.dart';
+import 'admin/admin_main_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
+import '../utils/constants.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -24,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmCtrl = TextEditingController();
   bool  _obscurePass    = true;
   bool  _obscureConfirm = true;
+  int   _userType       = UserTypes.user;
 
   // Real-time field error states
   String? _nameError;
@@ -56,6 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _emailCtrl.text.trim(),
       _passCtrl.text,
       _nameCtrl.text.trim(),
+      userType: _userType,
     );
 
     if (!mounted) return;
@@ -63,11 +67,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (result == 'success') {
       await context.read<ProductProvider>().init();
       if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const MainScreen()),
-        (_) => false,
-      );
+      if (auth.isAdmin) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const AdminMainScreen()),
+          (_) => false,
+        );
+      } else {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+          (_) => false,
+        );
+      }
     } else if (result == 'confirm') {
       await showDialog(
         context: context,
@@ -120,18 +132,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } else {
       // Map server error to the correct field
       final err = auth.error ?? '';
-      if (err.toLowerCase().contains('already registered') ||
+      final isAlreadyRegistered = err.toLowerCase().contains('already registered') ||
           err.toLowerCase().contains('already been registered') ||
-          err.toLowerCase().contains('duplicate') ||
-          err.toLowerCase().contains('email')) {
+          err.toLowerCase().contains('user already exists');
+
+      if (isAlreadyRegistered) {
         setState(() => _emailError =
             'This email is already registered. Please login instead.');
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('Account Already Exists'),
+            content: Text(
+              'The email "${_emailCtrl.text.trim()}" is already registered.\n\nPlease log in with your password, or use a different email to create a new account.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context); // close dialog
+                  Navigator.pop(context); // go back to login screen
+                },
+                child: const Text('Go to Login'),
+              ),
+            ],
+          ),
+        );
       } else if (err.toLowerCase().contains('password')) {
         setState(() => _passError = err);
       } else {
-        Helpers.showSnack(context,
-            err.isNotEmpty ? err : 'Registration failed. Please try again.',
-            error: true);
+        Helpers.showSnack(
+          context,
+          err.isNotEmpty ? err : 'Registration failed. Please try again.',
+          error: true,
+        );
       }
     }
   }
@@ -189,7 +227,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               key: _formKey,
               child: Column(
                 children: [
-
                   // ── Full Name ───────────────────────────
                   TextFormField(
                     controller:         _nameCtrl,
