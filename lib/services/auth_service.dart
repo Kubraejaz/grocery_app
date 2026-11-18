@@ -21,6 +21,9 @@ class AuthService {
     final uid = currentUser?.id;
     if (uid == null) return null;
 
+    final isAdminEmail = userEmail.toLowerCase().trim() == 'admin@store.com' ||
+        userEmail.toLowerCase().contains('admin');
+
     try {
       final res = await _client
           .from(Tables.profiles)
@@ -29,14 +32,47 @@ class AuthService {
           .maybeSingle();
 
       if (res != null) {
-        return UserProfile.fromJson(res);
+        int role = (res['user_type'] as num?)?.toInt() ?? UserTypes.user;
+        if (isAdminEmail && role != UserTypes.admin) {
+          role = UserTypes.admin;
+          try {
+            await _client.from(Tables.profiles).update({'user_type': UserTypes.admin}).eq('id', uid);
+          } catch (_) {}
+        }
+        return UserProfile(
+          id: uid,
+          fullName: res['full_name'] as String? ?? userName,
+          email: res['email'] as String? ?? userEmail,
+          userType: role,
+          createdAt: DateTime.parse(res['created_at'] as String? ?? DateTime.now().toIso8601String()),
+        );
+      } else {
+        // User exists in auth.users but not in profiles table -> auto-create profile
+        final defaultType = isAdminEmail ? UserTypes.admin : UserTypes.user;
+        try {
+          await _client.from(Tables.profiles).upsert({
+            'id': uid,
+            'full_name': userName.isNotEmpty ? userName : 'Admin',
+            'email': userEmail,
+            'user_type': defaultType,
+          });
+        } catch (_) {}
+
+        return UserProfile(
+          id: uid,
+          fullName: userName,
+          email: userEmail,
+          userType: defaultType,
+          createdAt: DateTime.now(),
+        );
       }
     } catch (_) {
       // Fallback if profiles table is not yet migrated
     }
 
-    // Fallback: check user metadata or default to regular customer
-    final metaType = (currentUser?.userMetadata?['user_type'] as num?)?.toInt() ?? UserTypes.user;
+    // Fallback: check user metadata or admin email
+    final metaType = (currentUser?.userMetadata?['user_type'] as num?)?.toInt() ??
+        (isAdminEmail ? UserTypes.admin : UserTypes.user);
     return UserProfile(
       id:        uid,
       fullName:  userName,

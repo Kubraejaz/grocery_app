@@ -9,6 +9,7 @@ import '../utils/app_theme.dart';
 import '../widgets/category_chip.dart';
 import '../widgets/featured_banner.dart';
 import '../widgets/product_card.dart';
+import 'admin/admin_main_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -84,6 +85,17 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : const Text('Grocery App'),
         actions: [
+          if (auth.isAdmin)
+            TextButton.icon(
+              icon: const Icon(Icons.admin_panel_settings, color: Colors.amber, size: 20),
+              label: const Text('Admin Panel', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AdminMainScreen()),
+                );
+              },
+            ),
           // Search toggle
           IconButton(
             icon: Icon(_showSearch ? Icons.close : Icons.search),
