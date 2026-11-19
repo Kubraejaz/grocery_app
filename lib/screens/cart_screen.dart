@@ -321,12 +321,6 @@ class _EmptyCart extends StatelessWidget {
               textAlign: TextAlign.center,
               style:     TextStyle(color: AppTheme.textMuted),
             ),
-            const SizedBox(height: 28),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context),
-              icon:       const Icon(Icons.store_outlined, size: 18),
-              label:      const Text('Browse Products'),
-            ),
           ],
         ),
       );

@@ -56,7 +56,7 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
       children: [
         // ── Banner slides ──────────────────────────────────
         SizedBox(
-          height: 185,
+          height: 195,
           // Listener wraps PageView — detects drag start/end
           // so we pause auto-slide while user is swiping
           child: GestureDetector(
@@ -118,13 +118,16 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
                             Expanded(
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
                                     // Featured tag
                                     Container(
                                       padding:
@@ -213,12 +216,13 @@ class _FeaturedBannerState extends State<FeaturedBanner> {
                                 ),
                               ),
                             ),
+                          ),
 
                             // ── Product image ───────────────
                             CachedNetworkImage(
                               imageUrl: p.imageUrl,
                               width:    130,
-                              height:   185,
+                              height:   195,
                               fit:      BoxFit.cover,
                               placeholder: (_, __) => Container(
                                 width: 130,

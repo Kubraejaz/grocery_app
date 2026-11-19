@@ -55,80 +55,32 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Stack(
-              children: [
-                const Icon(Icons.shopping_cart_outlined),
-                if (cart.totalCount > 0)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
+            icon: Badge.count(
+              count: cart.totalCount,
+              isLabelVisible: cart.totalCount > 0,
+              backgroundColor: const Color(0xFFE53935),
+              child: const Icon(Icons.shopping_cart_outlined),
             ),
-            activeIcon: Stack(
-              children: [
-                const Icon(Icons.shopping_cart),
-                if (cart.totalCount > 0)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
+            activeIcon: Badge.count(
+              count: cart.totalCount,
+              isLabelVisible: cart.totalCount > 0,
+              backgroundColor: const Color(0xFFE53935),
+              child: const Icon(Icons.shopping_cart),
             ),
             label: 'Cart',
           ),
           BottomNavigationBarItem(
-            icon: Stack(
-              children: [
-                const Icon(Icons.favorite_border),
-                if (wishlist.count > 0)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
+            icon: Badge.count(
+              count: wishlist.count,
+              isLabelVisible: wishlist.count > 0,
+              backgroundColor: const Color(0xFFE53935),
+              child: const Icon(Icons.favorite_border),
             ),
-            activeIcon: Stack(
-              children: [
-                const Icon(Icons.favorite),
-                if (wishlist.count > 0)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-              ],
+            activeIcon: Badge.count(
+              count: wishlist.count,
+              isLabelVisible: wishlist.count > 0,
+              backgroundColor: const Color(0xFFE53935),
+              child: const Icon(Icons.favorite),
             ),
             label: 'Wishlist',
           ),

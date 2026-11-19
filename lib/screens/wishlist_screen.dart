@@ -100,12 +100,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         'Tap the ♥ on any product to save it here',
                         style: TextStyle(color: AppTheme.textMuted),
                       ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () => Navigator.pop(context),
-                        icon:  const Icon(Icons.store_outlined, size: 18),
-                        label: const Text('Browse Products'),
-                      ),
                     ],
                   ),
                 )

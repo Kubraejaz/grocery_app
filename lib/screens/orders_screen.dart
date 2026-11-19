@@ -171,12 +171,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(color: AppTheme.textMuted, fontSize: 13),
                           ),
-                          const SizedBox(height: 20),
-                          ElevatedButton.icon(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.store_outlined, size: 18),
-                            label: const Text('Browse Groceries'),
-                          ),
                         ],
                       ),
                     ),
